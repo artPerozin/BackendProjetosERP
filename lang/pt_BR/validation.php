@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'array' => 'O campo :attribute deve ser uma lista.',
+    'after_or_equal' => 'O campo :attribute deve ser uma data posterior ou igual a :date.',
+    'boolean' => 'O campo :attribute deve ser verdadeiro ou falso.',
+    'between' => [
+        'numeric' => 'O campo :attribute deve estar entre :min e :max.',
+        'string' => 'O campo :attribute deve ter entre :min e :max caracteres.',
+    ],
+    'date' => 'O campo :attribute não é uma data válida.',
+    'date_format' => 'O campo :attribute deve estar no formato :format.',
+    'distinct' => 'O campo :attribute possui valor duplicado.',
+    'email' => 'O campo :attribute deve ser um e-mail válido.',
+    'exists' => 'O valor informado em :attribute não existe.',
+    'in' => 'O valor selecionado em :attribute é inválido.',
+    'integer' => 'O campo :attribute deve ser um número inteiro.',
+    'max' => [
+        'numeric' => 'O campo :attribute não pode ser maior que :max.',
+        'string' => 'O campo :attribute não pode ter mais de :max caracteres.',
+    ],
+    'min' => [
+        'numeric' => 'O campo :attribute deve ser no mínimo :min.',
+        'string' => 'O campo :attribute deve ter no mínimo :min caracteres.',
+    ],
+    'required' => 'O campo :attribute é obrigatório.',
+    'string' => 'O campo :attribute deve ser um texto.',
+
+    'attributes' => [
+        'nome' => 'nome',
+        'email' => 'e-mail',
+        'senha' => 'senha',
+        'perfil' => 'perfil',
+        'descricao' => 'descrição',
+        'inicio' => 'início',
+        'fim' => 'fim',
+        'membros' => 'membros',
+        'titulo' => 'título',
+        'prioridade' => 'prioridade',
+        'responsaveis' => 'responsáveis',
+        'tipo' => 'tipo',
+        'data' => 'data',
+        'hora' => 'hora',
+        'sala' => 'sala',
+        'instrutor' => 'instrutor',
+        'vagas' => 'vagas',
+        'coluna' => 'coluna',
+        'status' => 'status',
+        'ativo' => 'ativo',
+        'usuarioId' => 'usuário',
+        'projetoId' => 'projeto',
+    ],
+];

@@ -2,75 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Repositories\AuthRepository;
-use App\Http\Requests\AuthRequest;
-use App\Http\Services\Auth\AuthValidationService;
-use App\Http\Services\Auth\GetPermissionsService;
-use App\Http\Services\Auth\TokenRevocationService;
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UsuarioResource;
+use App\Models\Capacitacao;
+use App\Models\Tarefa;
+use App\Models\User;
+use App\Services\AuthService;
+use App\Support\Data;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Response;
 
-class AuthController extends Controller
+class AuthController extends ApiController
 {
-    /**
-     * @var TokenRevocationService
-     */
-    private $tokenRevocationService;
-
-    /**
-     * @var GetPermissionsService
-     */
-    private $getPermissionsService;
-
-    /**
-     * @var AuthValidationService
-     */
-    private $authValidationService;
-
-    public function __construct(
-        TokenRevocationService $tokenRevocationService,
-        GetPermissionsService $getPermissionsService,
-        AuthValidationService $authValidationService
-    ) {
-        $this->tokenRevocationService = $tokenRevocationService;
-        $this->getPermissionsService = $getPermissionsService;
-        $this->authValidationService = $authValidationService;
-    }
-    
-    public function login(AuthRequest $request): JsonResponse
+    public function __construct(private readonly AuthService $auth)
     {
-        try {
-            $credentials = $request->only('email', 'password');
-            $isAuthenticated = $this->authValidationService->handle($credentials);
-            if($isAuthenticated){
-                $user = $request->user();
-                $this->tokenRevocationService->handle($user);
-            }
-            $profile = $user->profile();
-            $permissionsUser = $this->getPermissionsService->handle($user->profile()->name);;
-            $token = $user->createToken($permissionsUser)->plainTextToken;
-            return $this->response('Autorizado', Response::HTTP_OK, [
-                'name' => $user->name,
-                'profile' => $profile->name,
-                'permissions' => $permissionsUser,
-                'token' => $token
-            ]);
-        } catch (\Throwable $error) {
-            return $this->error('Erro ao tentar fazer logout.', 500, ['exception' => $error->getMessage()]);
-        }
     }
 
-    public function logout(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        try {
-            $user = $request->user();
-            $this->tokenRevocationService->handle($user);
-            return $this->success('Logout realizado com sucesso.');
-        } catch (\Throwable $error) {
-            return $this->error('Erro ao tentar fazer logout.', 500, ['exception' => $error->getMessage()]);
-        }
+        $resultado = $this->auth->login($request->validated('email'), $request->validated('senha'));
+
+        return response()->json([
+            'token' => $resultado['token'],
+            'expiraEm' => $resultado['expiraEm'],
+            'usuario' => (new UsuarioResource($resultado['usuario']))->resolve($request),
+        ]);
     }
-    
+
+    public function logout(Request $request): Response
+    {
+        $this->auth->logout($request->user());
+
+        return response()->noContent();
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        return $this->recurso(UsuarioResource::class, $request->user(), $request);
+    }
+
+    /** Domínios e data do servidor. */
+    public function config(): JsonResponse
+    {
+        return response()->json([
+            'hoje' => Data::hoje()->toDateString(),
+            'perfis' => User::PERFIS,
+            'prioridades' => Tarefa::PRIORIDADES,
+            'tiposCapacitacao' => collect(Capacitacao::ROTULOS)
+                ->map(fn ($rotulo, $valor) => ['valor' => $valor, 'rotulo' => $rotulo])
+                ->values()
+                ->all(),
+            'statusTarefa' => Tarefa::STATUS,
+        ]);
+    }
 }

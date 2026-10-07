@@ -14,7 +14,7 @@ use App\Http\Services\User\UpdateOneUserService;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class UsuarioController extends Controller
 {
     use HttpResponses;
 

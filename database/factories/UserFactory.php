@@ -2,43 +2,42 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
+/** @extends Factory<User> */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'nome' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'password' => 'senha123',
+            'perfil' => User::MEMBRO,
+            'ativo' => true,
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function diretor(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(['perfil' => User::DIRETOR]);
+    }
+
+    public function gerente(): static
+    {
+        return $this->state(['perfil' => User::GERENTE]);
+    }
+
+    public function membro(): static
+    {
+        return $this->state(['perfil' => User::MEMBRO]);
+    }
+
+    public function inativo(): static
+    {
+        return $this->state(['ativo' => false]);
     }
 }

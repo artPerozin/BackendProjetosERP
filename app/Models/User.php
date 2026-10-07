@@ -2,59 +2,71 @@
 
 namespace App\Models;
 
+use App\Services\PermissionService;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    use HasApiTokens, HasFactory, Notifiable;
 
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    public const DIRETOR = 'diretor';
+    public const GERENTE = 'gerente';
+    public const MEMBRO = 'membro';
+    public const PERFIS = [self::DIRETOR, self::GERENTE, self::MEMBRO];
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'profile_id',
-        'is_active',
-        'file_id',
-        'deleted_at'
-    ];
+    protected $table = 'users';
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-        'profile'
-    ];
+    protected $fillable = ['nome', 'email', 'perfil', 'ativo', 'password'];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function profile()
+    protected function casts(): array
     {
-        return $this->belongsTo(Profile::class);
+        return [
+            'ativo' => 'boolean',
+            'password' => 'hashed',
+        ];
+    }
+
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
+
+    public function projetos(): BelongsToMany
+    {
+        return $this->belongsToMany(Projeto::class, 'projeto_usuario', 'usuario_id', 'projeto_id');
+    }
+
+    public function tarefas(): BelongsToMany
+    {
+        return $this->belongsToMany(Tarefa::class, 'tarefa_usuario', 'usuario_id', 'tarefa_id');
+    }
+
+    public function capacitacoes(): BelongsToMany
+    {
+        return $this->belongsToMany(Capacitacao::class, 'capacitacao_inscricoes', 'usuario_id', 'capacitacao_id')
+            ->withTimestamps();
+    }
+
+    /** Permissões do perfil (vêm do service de get-permissions). */
+    public function permissoes(): array
+    {
+        return app(PermissionService::class)->getPermissions($this->perfil);
+    }
+
+    public function temPermissao(string $permissao): bool
+    {
+        return in_array($permissao, $this->permissoes(), true);
+    }
+
+    public function ehDiretor(): bool
+    {
+        return $this->perfil === self::DIRETOR;
     }
 }
