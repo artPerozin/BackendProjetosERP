@@ -5,15 +5,19 @@ export default class SenioridadeUsuario {
     readonly codigo: string;
     readonly nome: string;
     readonly valorHora: number;
+    /** Posição na escada de senioridade (Trainee = 1 ... Liderança = 5). */
+    readonly ordem: number;
 
     constructor(
         codigo: string,
         nome: string,
         valorHora: number,
+        ordem: number = 0,
     ) {
         this.codigo = codigo;
         this.nome = nome;
         this.valorHora = valorHora;
+        this.ordem = ordem;
 
         this.validar();
     }

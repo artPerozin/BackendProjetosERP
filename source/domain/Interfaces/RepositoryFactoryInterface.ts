@@ -7,6 +7,11 @@ import CapacitacaoFeedbackRepositoryInterface from "./CapacitacaoFeedbackReposit
 import CheckinRepositoryInterface from "./CheckinRepositoryInterface";
 import PastaRepositoryInterface from "./PastaRepositoryInterface";
 import DocumentoRepositoryInterface from "./DocumentoRepositoryInterface";
+import AreaRepositoryInterface from "./AreaRepositoryInterface";
+import CargoRepositoryInterface from "./CargoRepositoryInterface";
+import HabilidadeRepositoryInterface from "./HabilidadeRepositoryInterface";
+import HistoricoPessoaRepositoryInterface from "./HistoricoPessoaRepositoryInterface";
+import RefreshTokenRepositoryInterface from "./RefreshTokenRepositoryInterface";
 
 export default interface RepositoryFactoryInterface {
     criarUsuarioRepository(): UsuarioRepositoryInterface;
@@ -18,4 +23,9 @@ export default interface RepositoryFactoryInterface {
     criarCheckinRepository(): CheckinRepositoryInterface;
     criarPastaRepository(): PastaRepositoryInterface;
     criarDocumentoRepository(): DocumentoRepositoryInterface;
+    criarAreaRepository(): AreaRepositoryInterface;
+    criarCargoRepository(): CargoRepositoryInterface;
+    criarHabilidadeRepository(): HabilidadeRepositoryInterface;
+    criarHistoricoPessoaRepository(): HistoricoPessoaRepositoryInterface;
+    criarRefreshTokenRepository(): RefreshTokenRepositoryInterface;
 }

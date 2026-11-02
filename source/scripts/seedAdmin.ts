@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { Pool } from "pg";
 import { hash } from "bcrypt";
+import { stringConexao } from "../infra/database/stringConexao";
 
 config();
 
@@ -19,23 +20,9 @@ async function seedAdmin(): Promise<void> {
         throw new Error("A senha deve possuir pelo menos 6 caracteres.");
     }
 
-    const pool = new Pool({
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DATABASE,
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT),
-    });
+    const pool = new Pool({ connectionString: stringConexao() });
 
     try {
-        await pool.query(
-            `INSERT INTO senioridades (codigo, nome, valor_hora) VALUES
-                ('junior', 'Júnior', 45),
-                ('pleno', 'Pleno', 75),
-                ('senior', 'Sênior', 120)
-             ON CONFLICT (codigo) DO NOTHING`,
-        );
-
         const existente = await pool.query(
             `SELECT codigo FROM usuarios
              WHERE LOWER(email) = LOWER($1)

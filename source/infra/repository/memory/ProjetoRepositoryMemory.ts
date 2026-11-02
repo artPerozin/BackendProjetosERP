@@ -1,5 +1,6 @@
 import Projeto from "../../../domain/Entity/Projeto";
-import ProjetoRepositoryInterface from "../../../domain/Interfaces/ProjetoRepositoryInterface";
+import ProjetoRepositoryInterface, { FiltroProjetos } from "../../../domain/Interfaces/ProjetoRepositoryInterface";
+import { normalizarBusca } from "../../../shared/texto";
 
 export default class ProjetoRepositoryMemory implements ProjetoRepositoryInterface {
     private projetos: Projeto[];
@@ -13,13 +14,18 @@ export default class ProjetoRepositoryMemory implements ProjetoRepositoryInterfa
         return projeto;
     }
 
-    async listar(): Promise<Projeto[]> {
-        return [...this.projetos];
+    async listar(filtro: FiltroProjetos = {}): Promise<Projeto[]> {
+        const busca = normalizarBusca(filtro.busca);
+        return this.projetos
+            .filter((p) => !filtro.status?.length || filtro.status.includes(p.status))
+            .filter((p) => !filtro.codigoArea || p.area?.codigo === filtro.codigoArea)
+            .filter((p) => !filtro.codigoResponsavel || p.responsavel?.codigo === filtro.codigoResponsavel)
+            .filter((p) => !busca || normalizarBusca(`${p.nome} ${p.referencia ?? ""} ${p.clienteNome ?? ""}`).includes(busca));
     }
 
     async listarPorMembro(codigoUsuario: string): Promise<Projeto[]> {
         return this.projetos.filter((p) =>
-            p.membros.some((m) => m.codigo === codigoUsuario),
+            p.participacoes.some((m) => m.usuario.codigo === codigoUsuario),
         );
     }
 

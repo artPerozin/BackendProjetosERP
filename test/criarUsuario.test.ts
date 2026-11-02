@@ -26,7 +26,7 @@ beforeEach(() => {
 
 test("Deve criar um usuário membro", async () => {
   const output = await criarUsuario.execute(inputValido);
-  expect(output.token).toBeTruthy();
+  expect(output.codigo).toBeTruthy();
 });
 
 test("Deve criar um usuário gerente com senioridade", async () => {
@@ -35,7 +35,7 @@ test("Deve criar um usuário gerente com senioridade", async () => {
     perfil: PerfilUsuario.GERENTE,
     senioridade: senioridadePleno,
   });
-  expect(output.token).toBeTruthy();
+  expect(output.codigo).toBeTruthy();
 });
 
 test("Não deve criar um usuário com senha inferior a seis caracteres", async () => {

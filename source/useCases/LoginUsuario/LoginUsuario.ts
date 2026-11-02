@@ -1,36 +1,32 @@
 import { compare } from "bcrypt";
-import { sign } from "jsonwebtoken";
 import RepositoryFactoryInterface from "../../domain/Interfaces/RepositoryFactoryInterface";
 import UsuarioRepositoryInterface from "../../domain/Interfaces/UsuarioRepositoryInterface";
 import LoginUsuarioInput from "./LoginUsuarioInput";
 import LoginUsuarioOutput from "./LoginUsuarioOutput";
-import { obterChavePrivada } from "../../shared/seguranca/chavesJwt";
+import { emitirSessao } from "../Sessao/emitirSessao";
+import { ErroNaoAutorizado } from "../../shared/erros/ErroNaoAutorizado";
+
 export const MENSAGEM_CREDENCIAIS_INVALIDAS = "Credenciais inválidas";
 
+/** RF-001: login por e-mail e senha, com token de acesso e refresh token. */
 export default class LoginUsuario {
     readonly usuarioRepository: UsuarioRepositoryInterface;
-    constructor(repositoryFactory: RepositoryFactoryInterface) {
+
+    constructor(private readonly repositoryFactory: RepositoryFactoryInterface) {
         this.usuarioRepository = repositoryFactory.criarUsuarioRepository();
     }
+
     async execute(input: LoginUsuarioInput): Promise<LoginUsuarioOutput> {
-        const email = input.email.trim().toLowerCase();
+        const email = String(input.email ?? "").trim().toLowerCase();
         const usuario = await this.usuarioRepository.buscarPorEmail(email);
-        if (!usuario || !usuario.ativo) {
-            throw new Error(MENSAGEM_CREDENCIAIS_INVALIDAS);
+        // Mesma mensagem para e-mail inexistente, senha errada e pessoa sem acesso (CT-001).
+        if (!usuario || !usuario.ativo || !usuario.senha) {
+            throw new ErroNaoAutorizado(MENSAGEM_CREDENCIAIS_INVALIDAS);
         }
-        const senhaConfere = await compare(input.senha, usuario.senha);
+        const senhaConfere = await compare(String(input.senha ?? ""), usuario.senha);
         if (!senhaConfere) {
-            throw new Error(MENSAGEM_CREDENCIAIS_INVALIDAS);
+            throw new ErroNaoAutorizado(MENSAGEM_CREDENCIAIS_INVALIDAS);
         }
-        const chavePrivada = obterChavePrivada();
-        const payload = {
-            codigo: usuario.codigo,
-            email: usuario.email,
-        };
-        const token = sign(payload, chavePrivada, {
-            algorithm: "RS256",
-            expiresIn: "2h",
-        });
-        return { token };
+        return emitirSessao(this.repositoryFactory, usuario);
     }
 }

@@ -1,5 +1,7 @@
 import Usuario from "../../../domain/Entity/Usuario";
-import UsuarioRepositoryInterface from "../../../domain/Interfaces/UsuarioRepositoryInterface";
+import UsuarioRepositoryInterface, { FiltroPessoas } from "../../../domain/Interfaces/UsuarioRepositoryInterface";
+import StatusPessoa from "../../../domain/Enum/StatusPessoa";
+import { normalizarBusca } from "../../../shared/texto";
 
 export default class UsuarioRepositoryMemory implements UsuarioRepositoryInterface {
     private usuarios: Usuario[];
@@ -22,8 +24,13 @@ export default class UsuarioRepositoryMemory implements UsuarioRepositoryInterfa
         return usuario;
     }
 
-    async listar(): Promise<Usuario[]> {
-        return [...this.usuarios];
+    async listar(filtro: FiltroPessoas = {}): Promise<Usuario[]> {
+        const busca = normalizarBusca(filtro.busca);
+        return this.usuarios
+            .filter((u) => !filtro.status?.length || filtro.status.includes(u.status))
+            .filter((u) => !filtro.codigoArea || u.area?.codigo === filtro.codigoArea)
+            .filter((u) => !busca || normalizarBusca(`${u.nome} ${u.nomeExibicao ?? ""} ${u.email}`).includes(busca))
+            .sort((a, b) => a.nome.localeCompare(b.nome));
     }
 
     async buscarPorCodigo(codigo: string): Promise<Usuario | null> {
@@ -66,15 +73,6 @@ export default class UsuarioRepositoryMemory implements UsuarioRepositoryInterfa
             throw new Error("Usuário não encontrado");
         }
 
-        const atual = this.usuarios[indice];
-        this.usuarios[indice] = new Usuario(
-            atual.nome,
-            atual.email,
-            atual.perfil,
-            false,
-            atual.senha,
-            atual.senioridade,
-            atual.codigo,
-        );
+        this.usuarios[indice] = this.usuarios[indice].copiar({ status: StatusPessoa.INATIVO });
     }
 }

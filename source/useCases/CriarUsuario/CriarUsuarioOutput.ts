@@ -1,3 +1,4 @@
-export default interface CriarUsuarioOutput {
-    token: string;
-}
+import Usuario from "../../domain/Entity/Usuario";
+
+type CriarUsuarioOutput = Usuario;
+export default CriarUsuarioOutput;

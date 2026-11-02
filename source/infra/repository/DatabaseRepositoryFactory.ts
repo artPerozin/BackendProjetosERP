@@ -18,6 +18,11 @@ import CapacitacaoFeedbackRepositoryDatabase from "./database/CapacitacaoFeedbac
 import CheckinRepositoryDatabase from "./database/CheckinRepositoryDatabase";
 import PastaRepositoryDatabase from "./database/PastaRepositoryDatabase";
 import DocumentoRepositoryDatabase from "./database/DocumentoRepositoryDatabase";
+import AreaRepositoryDatabase from "./database/AreaRepositoryDatabase";
+import CargoRepositoryDatabase from "./database/CargoRepositoryDatabase";
+import HabilidadeRepositoryDatabase from "./database/HabilidadeRepositoryDatabase";
+import HistoricoPessoaRepositoryDatabase from "./database/HistoricoPessoaRepositoryDatabase";
+import RefreshTokenRepositoryDatabase from "./database/RefreshTokenRepositoryDatabase";
 
 export default class DatabaseRepositoryFactory implements RepositoryFactoryInterface {
     private readonly conexao: ConexaoBanco;
@@ -60,5 +65,25 @@ export default class DatabaseRepositoryFactory implements RepositoryFactoryInter
 
     criarDocumentoRepository(): DocumentoRepositoryInterface {
         return new DocumentoRepositoryDatabase(this.conexao);
+    }
+
+    criarAreaRepository() {
+        return new AreaRepositoryDatabase(this.conexao);
+    }
+
+    criarCargoRepository() {
+        return new CargoRepositoryDatabase(this.conexao);
+    }
+
+    criarHabilidadeRepository() {
+        return new HabilidadeRepositoryDatabase(this.conexao);
+    }
+
+    criarHistoricoPessoaRepository() {
+        return new HistoricoPessoaRepositoryDatabase(this.conexao);
+    }
+
+    criarRefreshTokenRepository() {
+        return new RefreshTokenRepositoryDatabase(this.conexao);
     }
 }

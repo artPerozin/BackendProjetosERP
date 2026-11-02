@@ -1,6 +1,7 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/** @type {import('jest').Config} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testMatch: ['**/test/**/*.test.ts'],
+    preset: "ts-jest",
+    testEnvironment: "node",
+    testMatch: ["**/test/**/*.test.ts"],
+    setupFiles: ["<rootDir>/test/setupChaves.js"],
 };

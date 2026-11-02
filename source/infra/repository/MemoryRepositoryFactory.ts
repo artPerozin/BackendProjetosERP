@@ -17,6 +17,11 @@ import CapacitacaoFeedbackRepositoryMemory from "./memory/CapacitacaoFeedbackRep
 import CheckinRepositoryMemory from "./memory/CheckinRepositoryMemory";
 import PastaRepositoryMemory from "./memory/PastaRepositoryMemory";
 import DocumentoRepositoryMemory from "./memory/DocumentoRepositoryMemory";
+import AreaRepositoryMemory from "./memory/AreaRepositoryMemory";
+import CargoRepositoryMemory from "./memory/CargoRepositoryMemory";
+import HabilidadeRepositoryMemory from "./memory/HabilidadeRepositoryMemory";
+import HistoricoPessoaRepositoryMemory from "./memory/HistoricoPessoaRepositoryMemory";
+import RefreshTokenRepositoryMemory from "./memory/RefreshTokenRepositoryMemory";
 
 export default class MemoryRepositoryFactory implements RepositoryFactoryInterface {
     private readonly usuarioRepository: UsuarioRepositoryInterface;
@@ -75,5 +80,31 @@ export default class MemoryRepositoryFactory implements RepositoryFactoryInterfa
 
     criarDocumentoRepository(): DocumentoRepositoryInterface {
         return this.documentoRepository;
+    }
+
+    private readonly areaRepository = new AreaRepositoryMemory();
+    private readonly cargoRepository = new CargoRepositoryMemory();
+    private readonly habilidadeRepository = new HabilidadeRepositoryMemory();
+    private readonly historicoPessoaRepository = new HistoricoPessoaRepositoryMemory();
+    private readonly refreshTokenRepository = new RefreshTokenRepositoryMemory();
+
+    criarAreaRepository() {
+        return this.areaRepository;
+    }
+
+    criarCargoRepository() {
+        return this.cargoRepository;
+    }
+
+    criarHabilidadeRepository() {
+        return this.habilidadeRepository;
+    }
+
+    criarHistoricoPessoaRepository() {
+        return this.historicoPessoaRepository;
+    }
+
+    criarRefreshTokenRepository() {
+        return this.refreshTokenRepository;
     }
 }

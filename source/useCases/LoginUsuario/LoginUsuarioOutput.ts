@@ -1,3 +1,3 @@
-export default interface LoginUsuarioOutput {
-    token: string;
-}
+import { Sessao } from "../Sessao/emitirSessao";
+
+export default interface LoginUsuarioOutput extends Sessao {}

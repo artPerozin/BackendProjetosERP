@@ -14,8 +14,8 @@ export default class ExpressAuth implements Auth {
 
     async execute(request: any, response: any, next: any): Promise<any> {
         if (!request.headers || !request.headers['access-token']) {
-            return response.status(403).json({
-                message: 'Token is required'
+            return response.status(401).json({
+                message: 'Token de acesso ausente.'
             });
         }
         const token = request.headers['access-token'];
@@ -25,7 +25,7 @@ export default class ExpressAuth implements Auth {
             const user = await this.userRepository.buscarPorCodigo(data.codigo);
 
             if (!user || !user.ativo) {
-                return response.status(401).json({ message: "Invalid token" });
+                return response.status(401).json({ message: "Token inválido ou usuário inativo." });
             }
 
             request.body = request.body ?? {};
@@ -33,7 +33,7 @@ export default class ExpressAuth implements Auth {
             return next();
         } catch (e) {
             return response.status(401).json({
-                message: 'Invalid token'
+                message: 'Token inválido ou expirado.'
             });
         }
     }

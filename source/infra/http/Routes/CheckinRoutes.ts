@@ -4,17 +4,22 @@ import ModelRoutes from "./ModelRoutes";
 import ListarCheckins from "../../../useCases/ListarCheckins/ListarCheckins";
 import RegistrarCheckin from "../../../useCases/RegistrarCheckin/RegistrarCheckin";
 import EditarCheckin from "../../../useCases/EditarCheckin/EditarCheckin";
+import { exigirAutenticado, temPermissao, Permissao } from "../../../shared/seguranca/permissoes";
 
 export default class CheckinRoutes implements ModelRoutes {
     constructor(private readonly http: Http, private readonly factory: RepositoryFactoryInterface) {}
 
     init(): void {
-        this.http.route("get", "/checkins", true, async (_params: any, _body: any, query: any) =>
-            new ListarCheckins(this.factory).execute(query?.codigoUsuario));
+        // Check-ins têm humor e sentimento: membros veem só os próprios; gestores veem todos.
+        this.http.route("get", "/checkins", true, async (_params: any, body: any, query: any) => {
+            const usuario = exigirAutenticado(body.user);
+            const codigoUsuario = temPermissao(usuario, Permissao.CHECKINS_VER_TODOS) ? query?.codigoUsuario : usuario.codigo;
+            return new ListarCheckins(this.factory).execute(codigoUsuario);
+        });
 
         this.http.route("post", "/checkins", true, async (_params: any, body: any) =>
             new RegistrarCheckin(this.factory).execute({
-                codigoUsuario: body.codigoUsuario ?? body.user?.codigo,
+                codigoUsuario: exigirAutenticado(body.user).codigo,
                 semana: new Date(body.semana),
                 resumo: body.resumo,
                 aprendizados: body.aprendizados,
@@ -24,7 +29,7 @@ export default class CheckinRoutes implements ModelRoutes {
 
         this.http.route("put", "/checkins", true, async (_params: any, body: any) =>
             new EditarCheckin(this.factory).execute({
-                codigoUsuario: body.codigoUsuario ?? body.user?.codigo,
+                codigoUsuario: exigirAutenticado(body.user).codigo,
                 semana: new Date(body.semana),
                 resumo: body.resumo,
                 aprendizados: body.aprendizados,
